@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set +x
+
+URL=$1
+USERNAME=$2
+
+MYSQLUSER=root
+MYSQLPASS=password
+
+mkdir ../volumes/www/${USERNAME}
+mkdir ../volumes/run/${USERNAME}
+
+sed s/USERNAME/${USERNAME}/g ../templates/compose.yml.tmpl > /storage/compose/${USERNAME}.yml
+sed s/USERNAME/${USERNAME}/g /storage/bin/nginx.conf > /storage/nginx/${USERNAME}.conf
+sed -i s/URL/${URL}/g /storage/nginx/${USERNAME}.conf
+
+cd /storage/www/${USERNAME}
+wget http://wordpress.org/latest.tar.gz
+tar -xzf latest.tar.gz
+rm latest.tar.gz
+mv wordpress/* .
+rmdir wordpress
+chown -R www-data: /storage/www/${USERNAME}
+
+echo "create database ${USERNAME};
+grant all on ${USERNAME}.* to '${USERNAME}'@'%' identified by '${PASSWORD}';
+flush privileges;" | mysql -h 127.0.0.1 -u ${MYSQLUSER} -p${MYSQLPASS}
+
+docker kill -s HUP compose_nginx_1
+/usr/local/bin/docker-compose -f /storage/compose/docker-compose.yml -f /storage/compose/${USERNAME}.yml up -d ${USERNAME}

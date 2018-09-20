@@ -1,0 +1,45 @@
+version: '3'
+services:
+  nginx:
+    #image: hub.vivabikini.com/nginx
+    build: images/nginx
+    volumes:
+      - ./volumes/nginx:/etc/nginx/conf.d:ro
+      - ./volumes/www:/var/www/html:ro
+      - ./volumes/letsencrypt:/etc/letsencrypt:ro
+      - ./volumes/run:/var/run/php-fpm
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+  mysql:
+    image: mysql
+    volumes:
+      - ./volumes/mysql:/var/lib/mysql
+      - ./volumes/run/mysqld:/run/mysqld
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "127.0.0.1:3306:3306"
+  wp-cli:
+    #image: hub.vivabikini.com/wp-cli
+    build: images/wp-cli
+    volumes:
+      - ./volumes/www:/var/www
+      - ./volumes/run/mysqld:/run/mysqld
+    links:
+      - mysql
+    depends_on:
+      - mysql
+  localhost:
+    #image: hub.vivabikini.com/php-fpm
+    build: images/php-fpm
+    volumes:
+      - ./volumes/www/localhost:/var/www/html
+      - ./volumes/run/localhost:/var/run/php-fpm
+      - ./volumes/logs/php-fpm/localhost:/var/log/php-fpm
+      - ./volumes/etc/ssmtp.conf:/etc/ssmtp/ssmtp.conf
+      - ./volumes/run/mysqld:/run/mysqld
+    links:
+      - mysql
+    depends_on:
+      - mysql
