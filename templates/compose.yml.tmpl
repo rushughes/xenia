@@ -1,0 +1,12 @@
+USERNAME:
+  build: images/php-fpm
+  volumes:
+    - ./volumes/www/USERNAME:/var/www/html
+    - ./volumes/run/USERNAME:/var/run/php-fpm
+    - ./volumes/logs/php-fpm/USERNAME:/var/log/php-fpm
+    - ./volumes/etc/ssmtp.conf:/etc/ssmtp/ssmtp.conf
+    - ./volumes/run/mysqld:/var/run/mysqld
+  links:
+    - mysql
+  depends_on:
+    - mysql

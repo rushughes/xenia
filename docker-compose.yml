@@ -1,7 +1,7 @@
 version: '3'
 services:
   nginx:
-    #image: hub.vivabikini.com/nginx
+    #image: hub.docker.com/rushughes/nginx
     build: images/nginx
     volumes:
       - ./volumes/nginx:/etc/nginx/conf.d:ro
@@ -21,24 +21,25 @@ services:
     ports:
       - "127.0.0.1:3306:3306"
   wp-cli:
-    #image: hub.vivabikini.com/wp-cli
+    #image: hub.docker.com/rushughes/wp-cli
     build: images/wp-cli
     volumes:
       - ./volumes/www:/var/www
       - ./volumes/run/mysqld:/run/mysqld
+      - ./:/root
     links:
       - mysql
     depends_on:
       - mysql
   localhost:
-    #image: hub.vivabikini.com/php-fpm
+    #image: hub.docker.com/rushughes/php-fpm
     build: images/php-fpm
     volumes:
       - ./volumes/www/localhost:/var/www/html
       - ./volumes/run/localhost:/var/run/php-fpm
       - ./volumes/logs/php-fpm/localhost:/var/log/php-fpm
       - ./volumes/etc/ssmtp.conf:/etc/ssmtp/ssmtp.conf
-      - ./volumes/run/mysqld:/run/mysqld
+      - ./volumes/run/mysqld:/var/run/mysqld
     links:
       - mysql
     depends_on:

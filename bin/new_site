@@ -10,12 +10,13 @@ MYSQLPASS=password
 
 mkdir ../volumes/www/${USERNAME}
 mkdir ../volumes/run/${USERNAME}
+mkdir ../volumes/logs/php-fpm/${USERNAME}
 
-sed s/USERNAME/${USERNAME}/g ../templates/compose.yml.tmpl > /storage/compose/${USERNAME}.yml
-sed s/USERNAME/${USERNAME}/g /storage/bin/nginx.conf > /storage/nginx/${USERNAME}.conf
-sed -i s/URL/${URL}/g /storage/nginx/${USERNAME}.conf
+sed s/USERNAME/${USERNAME}/g ../templates/compose.yml.tmpl >> docker-compose.yml
+sed s/USERNAME/${USERNAME}/g ../templates/nginx.conf.tmpl > ../volumes/nginx/${USERNAME}.conf
+sed -i s/URL/${URL}/g ../volumes/nginx/${USERNAME}.conf
 
-cd /storage/www/${USERNAME}
+cd ../volumes/www/${USERNAME}
 wget http://wordpress.org/latest.tar.gz
 tar -xzf latest.tar.gz
 rm latest.tar.gz
