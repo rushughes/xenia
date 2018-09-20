@@ -14,8 +14,15 @@ vcl 4.0;
 
 # Default backend definition. Set this to point to your content server.
 backend default {
-    .host = "127.0.0.1";
+    .host = "nginx";
     .port = "8080";
+}
+
+acl purge {
+    "localhost";
+    "127.0.0.1";
+    "::1";
+    "172.23.0.0"/24;
 }
 
 sub vcl_recv {
@@ -23,6 +30,27 @@ sub vcl_recv {
     #
     # Typically you clean up the request here, removing cookies you don't need,
     # rewriting the request, etc.
+
+    if (req.method == "PURGE") {
+      if (client.ip !~ purge) {
+        return (synth(405, "Not allowed."));
+      } else {
+        return (purge);
+      }
+    }
+
+    set req.http.cookie = regsuball(req.http.cookie, "wp-settings-\d+=[^;]+(; )?", "");
+    set req.http.cookie = regsuball(req.http.cookie, "wp-settings-time-\d+=[^;]+(; )?", "");
+    set req.http.cookie = regsuball(req.http.cookie, "wordpress_test_cookie=[^;]+(; )?", "");
+
+    if (req.http.cookie == "") {
+      unset req.http.cookie;
+    }
+
+    if (req.url ~ "wp-admin|wp-login") {
+      return (pass);
+    }
+
 }
 
 sub vcl_backend_response {
@@ -30,6 +58,11 @@ sub vcl_backend_response {
     #
     # Here you clean the response headers, removing silly Set-Cookie headers
     # and other mistakes your backend does.
+
+    if (beresp.ttl == 120s) {
+      set beresp.ttl = 1h;
+    }
+
 }
 
 sub vcl_deliver {

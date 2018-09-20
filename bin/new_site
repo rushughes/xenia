@@ -12,7 +12,7 @@ mkdir ../volumes/www/${USERNAME}
 mkdir ../volumes/run/${USERNAME}
 mkdir ../volumes/logs/php-fpm/${USERNAME}
 
-sed s/USERNAME/${USERNAME}/g ../templates/compose.yml.tmpl >> docker-compose.yml
+sed s/USERNAME/${USERNAME}/g ../templates/compose.yml.tmpl >> ../docker-compose.yml
 sed s/USERNAME/${USERNAME}/g ../templates/nginx.conf.tmpl > ../volumes/nginx/${USERNAME}.conf
 sed -i s/URL/${URL}/g ../volumes/nginx/${USERNAME}.conf
 

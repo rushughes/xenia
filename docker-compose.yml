@@ -9,8 +9,12 @@ services:
       - ./volumes/letsencrypt:/etc/letsencrypt:ro
       - ./volumes/run:/var/run/php-fpm
     ports:
-      - "0.0.0.0:80:80"
+      - "0.0.0.0:8080:8080"
       - "0.0.0.0:443:443"
+  varnish:
+    build: images/varnish
+    ports:
+      - "0.0.0.0:80:80"
   mysql:
     image: mysql
     volumes:
